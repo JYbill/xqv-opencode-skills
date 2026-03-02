@@ -3,7 +3,8 @@ name: codebase
 description: 如果需要获取本地代码相关优先使用本SKILL.md，本skill能够直接提升本地代码的查询效率
 mcp:
   codebase:
-    command: ["pnpx", "@zilliz/claude-context-mcp@latest"]
+    command: npx
+    args: ["-y", "@zilliz/claude-context-mcp@latest"]
     environment:
       EMBEDDING_PROVIDER: OpenAI
       OPENAI_BASE_URL: ${OPENAI_BASE_URL}
