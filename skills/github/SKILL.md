@@ -47,3 +47,17 @@ mcp:
 - get_label：获取特定标签
 - list_label：列出所有标签
 - list_issue_types：列出 issue 类型（组织级）
+
+# 场景
+
+- 以github代码内容作为论点时，不要带上代码，除非用户显示要求返回代码内容
+  - 错误回答例子
+  ```
+  使用 Node.js https 模块: src/gateway/server-http.ts (查看代码 (https://github.com/openclaw/openclaw/blob/main/src/gateway/server-http.ts#L478))
+  const httpServer: HttpServer = opts.tlsOptions ...
+  ```
+
+  - 正确回答例子
+  ```
+  使用 Node.js https 模块: src/gateway/server-http.ts (源码：https://github.com/openclaw/openclaw/blob/main/src/gateway/server-http.ts#L478)
+  ```
