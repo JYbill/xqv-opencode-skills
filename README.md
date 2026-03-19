@@ -10,6 +10,7 @@
 
 - 使用前提：准备环境变量
 - 环境变量来源于：[claude-context mcp](https://github.com/zilliztech/claude-context/blob/master/docs/getting-started/environment-variables.md#-required-environment-variables)
+- 修改`codebase/.env`文件放入到`~/.context/`目录下即可
 
 ```bash
 # embedding提供商接口格式，默认为OpenAI接口格式

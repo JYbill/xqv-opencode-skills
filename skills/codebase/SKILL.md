@@ -5,13 +5,6 @@ mcp:
   codebase:
     command: npx
     args: ["-y", "@zilliz/claude-context-mcp@latest"]
-    environment:
-      EMBEDDING_PROVIDER: OpenAI
-      OPENAI_BASE_URL: ${CODEBASE_OPENAI_BASE_URL}
-      OPENAI_API_KEY: ${CODEBASE_OPENAI_API_KEY}
-      EMBEDDING_MODEL: ${CODEBASE_EMBEDDING_MODEL}
-      MILVUS_ADDRESS: ${CODEBASE_MILVUS_ADDRESS}
-      CUSTOM_IGNORE_PATTERNS: tmp/**,logs/**,.ai/**,.aiassistant/**,.cache/**,.claude/**,.github/**,.husky/**,.idea/**,.sisphus/**,public/**,vendor/**,*.env
 ---
 
 # 预备操作
