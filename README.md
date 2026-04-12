@@ -1,7 +1,8 @@
-# xqv-opencode-skills
+# xqv-skills
 
-- 这是一个opencode推荐skills仓库，包含所有本人推荐以及可用的skills + mcp，如果要使用本skills，务必满足skills支持mcp功能，能满足该功能的agent client有：opencode...
+- 这是一个skills收集仓库，opencode目录为opencode + oh-my-opencode专属skill
 
+# opencode skill
 ## github skill
 
 - 使用前提：需要准备github_pat个人私钥，并设置为`GITHUB_PAT_TOKEN`环境变量
