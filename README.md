@@ -8,6 +8,10 @@
 
 用于创建、迁移、清理仓库级 `CLAUDE.md`。适合把 Cursor、Copilot、`AGENTS.md` 一类协作说明收敛成 Claude Code 可直接执行的高信号规则。
 
+### ddt-packaging
+
+用于识别和纠正过度封装。适合用户指出代码拆得太碎、helper 太薄、类型拆分过度、主流程阅读路径过长时，帮助内联单一调用方的小函数，合并没有独立复用价值的薄类型。
+
 ### node
 
 用于 Node.js 日常开发实践。覆盖原生 TypeScript type stripping、异步模式、模块系统、测试、性能、缓存、日志、环境变量管理和优雅退出等通用场景。
