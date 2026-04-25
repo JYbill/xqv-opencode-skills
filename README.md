@@ -20,6 +20,14 @@
 
 用于 Node.js 底层问题排查。适合处理 V8、libuv、N-API、`node-gyp`、C++ addon、原生崩溃、内存泄漏和引擎级性能分析。
 
+### search
+
+用于按问题场景使用 GitHub MCP、Context7 MCP、Exa WebSearch MCP 搜索并回答。适合用户要求联网检索、查 GitHub 项目和源码、核对框架或 SDK 文档、查 API 用法，以及查官网、博客、产品信息、新闻和对比资料时使用。
+
+使用原则：GitHub 仓库内的源码、README、issue、PR、commit、release、workflow 等事实优先走 GitHub MCP；库、框架、SDK、API 参数、配置项、迁移说明和最佳实践优先走 Context7 MCP；全网资料、官网页面、博客、新闻和产品对比优先走 Exa WebSearch MCP。一个问题同时涉及多种来源时可以组合使用，但回答里必须标明来源。
+
+补充约束：这个 skill 禁止用 Bash、subagent、Agent、Glob、Grep、Read 一类常规工具替代外部搜索；只有用户明确要求处理本地文件，或提供了本地输入文件时，才读取本地文件。查不到的信息必须直接说明未查到，不能猜。
+
 ### typescript-magician
 
 用于 TypeScript 类型问题处理。适合修复编译错误、消除 `any`、编写泛型、条件类型、类型守卫，以及提升类型推导和 IntelliSense 质量。
