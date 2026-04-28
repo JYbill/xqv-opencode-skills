@@ -20,6 +20,10 @@
 
 用于 Node.js 底层问题排查。适合处理 V8、libuv、N-API、`node-gyp`、C++ addon、原生崩溃、内存泄漏和引擎级性能分析。
 
+### notes
+
+用于代码注释治理。适合补注释、调整注释、review 注释质量，以及判断复杂逻辑、数据转换、输出模板和 Agent 提示边界中哪些内容值得注释。
+
 ### search
 
 用于按问题场景使用 GitHub MCP、Context7 MCP、Exa WebSearch MCP 搜索并回答。适合用户要求联网检索、查 GitHub 项目和源码、核对框架或 SDK 文档、查 API 用法，以及查官网、博客、产品信息、新闻和对比资料时使用。
