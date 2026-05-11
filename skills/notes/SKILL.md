@@ -29,6 +29,8 @@ description: 当用户要求补注释、调整注释、review 注释质量、把
 
 数组转 Map、按名称取维度、按业务 key 聚合这类结构转换要加注释。说明转换后是为了按业务语义读取。
 
+字符串拼接、join 分隔符、展示文案合成这类逻辑要加注释。说明最终会拼成什么人能看到的样子，比如 `学生A、学生B、学生C`。
+
 ## 禁止写法
 
 不要给一行普通取值写注释，比如 `const questionActivityCount = output.question?.activityCount ?? "计算中";`。
@@ -68,4 +70,7 @@ const attendanceRateAverageNumber = Number(evaluation.attendanceRateAverage);
 if (Number.isFinite(attendanceRateNumber) && Number.isFinite(attendanceRateAverageNumber)) {
   const attendanceRateComparison = attendanceRateNumber >= attendanceRateAverageNumber ? "高出" : "低于";
 }
+
+// 有姓名时拼成 学生A、学生B、学生C 这种展示形式，不展示内部 studentId。
+const quickAnswerTopStudentText = `${quickAnswerTopStudentNames.join("、")}同学互动积极`;
 ```

@@ -1,28 +1,24 @@
 # xqv-skills
 
-这是一个 skills 收集仓库。`skills/opencode/` 目录存放 opencode + oh-my-opencode 专属 skill，其余目录为通用 skill。
+这是一个 skills 收集仓库。`skills/` 目录存放 Claude Code 通用 skill，`oma-skills/` 目录存放 opencode + oh-my-opencode 专属 skill。
 
 ## skill 总览
 
-### claude-init
+### ddt
 
-用于创建、迁移、清理仓库级 `CLAUDE.md`。适合把 Cursor、Copilot、`AGENTS.md` 一类协作说明收敛成 Claude Code 可直接执行的高信号规则。
+用于检查并纠正代码里的过度封装、过度抽象、薄 helper、薄类型拆分和项目编码规范问题。适合用户要求内联单一调用方的小函数、合并没有复用价值的薄类型、提升主流程可读性，或检查代码是否符合仓库 `CLAUDE.md` / `AGENTS.md` 规范时使用。
 
-### ddt-packaging
+### kysely-schema
 
-用于识别和纠正过度封装。适合用户指出代码拆得太碎、helper 太薄、类型拆分过度、主流程阅读路径过长时，帮助内联单一调用方的小函数，合并没有独立复用价值的薄类型。
+用于根据 MySQL DDL 生成 Kysely 表结构类型，以及按需补齐对应的插入、更新方法。适合新增 `src/types/database.d.ts` 表类型、处理 `Generated<>` / `Selectable` / `Insertable` / `Updateable`，以及保持 camelCase 字段和 snake_case SQL 字段映射一致时使用。
 
-### node
+### note-summary
 
-用于 Node.js 日常开发实践。覆盖原生 TypeScript type stripping、异步模式、模块系统、测试、性能、缓存、日志、环境变量管理和优雅退出等通用场景。
-
-### nodejs-core
-
-用于 Node.js 底层问题排查。适合处理 V8、libuv、N-API、`node-gyp`、C++ addon、原生崩溃、内存泄漏和引擎级性能分析。
+用于把截图、板书、课件、流程图和结构图整理成可复制的学习笔记。适合图片转文本、白板内容整理、ASCII 框图重建，以及按标题、框图、解释输出复习材料。
 
 ### notes
 
-用于代码注释治理。适合补注释、调整注释、review 注释质量，以及判断复杂逻辑、数据转换、输出模板和 Agent 提示边界中哪些内容值得注释。
+用于代码注释治理。适合补注释、调整注释、review 注释质量，以及判断复杂逻辑、数据转换、输出模板、字符串拼接展示文案和 Agent 提示边界中哪些内容值得注释。
 
 ### search
 
@@ -32,11 +28,11 @@
 
 补充约束：这个 skill 禁止用 Bash、subagent、Agent、Glob、Grep、Read 一类常规工具替代外部搜索；只有用户明确要求处理本地文件，或提供了本地输入文件时，才读取本地文件。查不到的信息必须直接说明未查到，不能猜。
 
-### typescript-magician
+### summary
 
-用于 TypeScript 类型问题处理。适合修复编译错误、消除 `any`、编写泛型、条件类型、类型守卫，以及提升类型推导和 IntelliSense 质量。
+用于根据指定代码文件生成清晰的人类友好总结文档。适合用户要求总结某个模块、tool、service、接口链路、核心逻辑、影响范围或 TODO 时使用。
 
-## opencode skill
+## oma-skills
 
 ### github
 
@@ -50,23 +46,19 @@
 
 用于本地代码库语义搜索。基于 Milvus 混合检索能力提升本地代码查询效率，适合在本地仓库中按自然语言检索实现、定位上下文。
 
-使用前提：需要准备环境变量。
-
-环境变量来源于：[claude-context mcp](https://github.com/zilliztech/claude-context/blob/master/docs/getting-started/environment-variables.md#-required-environment-variables)
-
-将 `codebase/.env` 中对应配置放入 `~/.context/` 目录即可。
+使用前提：需要准备环境变量，可参考 `oma-skills/codebase/.env`。
 
 ```bash
 # embedding 提供商接口格式，默认为 OpenAI 接口格式
 EMBEDDING_PROVIDER
 # OpenAI 地址，一般是私有化地址
-CODEBASE_OPENAI_BASE_URL
+OPENAI_BASE_URL
 # OpenAI 密钥
-CODEBASE_OPENAI_API_KEY
+OPENAI_API_KEY
 # embedding 模型名称
-CODEBASE_EMBEDDING_MODEL
+EMBEDDING_MODEL
 # milvus 向量数据库地址
-CODEBASE_MILVUS_ADDRESS
+MILVUS_ADDRESS
 # embedding 过程忽略的文件表达式
 CUSTOM_IGNORE_PATTERNS
 ```

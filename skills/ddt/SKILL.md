@@ -1,13 +1,19 @@
 ---
-name: ddt-packaging
-description: Detect and correct over-packaging in code. Use this skill whenever the user complains about over-abstraction, over-packaging, over-encapsulation, too many tiny helpers, unnecessary type splitting, readability regressions from excessive method extraction, or asks to inline small single-use functions or merge prematurely split types.
+name: ddt
+description: 检查并纠正代码里的过度封装、过度抽象、薄 helper、薄类型拆分和编码规范问题；当用户要求内联小函数、合并薄类型、提升代码可读性或检查代码是否符合项目规范时使用。
 ---
 
-# ddt-packaging
+# ddt
 
-DDT means dont-do-that packaging.
+DDT 表示 dont-do-that packaging。
 
 这个 skill 用来约束一种常见坏味道，就是明明代码很短、语义很直接、调用关系也很单一，却还要硬拆一层函数、硬拆一层类型，最后让人类阅读路径变长，理解成本变高。
+
+## 规范读取要求
+
+如果这个 skill 要审查或修改项目代码，必须先让 agent 读取仓库内的 `CLAUDE.md` 和存在的 `AGENTS.md` 文件，再判断代码是否符合编码规范。检查时要同时看项目规范、用户长期约束和当前代码，不允许只按这个 skill 的过度封装规则下结论。
+
+重点检查这些规范是否被破坏：service 查询和变更职责拆分、复杂业务是否进入 `logic/`、类型是否放在 `src/types/**`、业务数字是否使用 `enum/**`、数据库读写是否优先使用 Kysely、SQL 别名是否具备可读性、static 方法内是否显式用类名调用同类 static 方法、导入是否合并、导出函数和 class static 方法是否有简短 JSDoc。
 
 ## 什么时候触发
 
@@ -78,7 +84,7 @@ DDT means dont-do-that packaging.
 
 ## 反模式清单
 
-下面这些默认都当作 dont-do-that packaging。
+下面这些默认都属于 dont-do-that packaging。
 
 只有一个调用方的 2 到 5 行薄函数。
 
@@ -91,6 +97,8 @@ DDT means dont-do-that packaging.
 本来一个类型能表达清楚，却拆成主类型加一层子类型再加一层别名类型。
 
 没有复用价值，却只为了看起来工整而把嵌套对象强行拆出去。
+
+只服务一处简单查询或判断的业务数字，不要为了避开“魔法数字”机械新增枚举。比如逻辑删除字段 `doDelete = 0` 只在一个很短的查询里使用时，直接写在查询条件里更清楚；只有状态值会跨多个文件、多个分支、多个业务动作复用，或者数字本身难以从上下文理解时，才抽到 `enum/**`。
 
 ## 例子
 
@@ -240,6 +248,47 @@ private mapToolLabel(tool: AgentTool) {
 
 ```ts
 const labels = toolList.map((tool) => tool.label);
+```
+
+例子五。
+
+下面这种枚举拆分看起来符合“不要魔法数字”，但实际只有一个查询使用，阅读者还得跳到 enum 文件才能知道 `NORMAL` 就是 `0`，属于为了形式牺牲可读性。
+
+```ts
+export const AgentAskTemplateDeleteStatus = {
+  NORMAL: 0,
+  DELETED: 1,
+} as const;
+
+export class AgentQuery {
+  /**
+   * 查询 Agent 问法模板列表
+   */
+  static async getAskTemplateList() {
+    return await db
+      .selectFrom("wzj_agent_ask_template")
+      .select(["id", "ask", "description", "updateTime", "createTime"])
+      .where("doDelete", "=", AgentAskTemplateDeleteStatus.NORMAL)
+      .execute();
+  }
+}
+```
+
+更合适的写法是让这个单点条件直接留在查询里。`doDelete` 已经表达了逻辑删除语义，`0` 在这个上下文里没有必要再包一层枚举。
+
+```ts
+export class AgentQuery {
+  /**
+   * 查询 Agent 问法模板列表
+   */
+  static async getAskTemplateList() {
+    return await db
+      .selectFrom("wzj_agent_ask_template")
+      .select(["id", "ask", "description", "updateTime", "createTime"])
+      .where("doDelete", "=", 0)
+      .execute();
+  }
+}
 ```
 
 ## 决策偏好
