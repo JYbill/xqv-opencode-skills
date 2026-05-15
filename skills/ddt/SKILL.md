@@ -291,6 +291,32 @@ export class AgentQuery {
 }
 ```
 
+例子六。
+
+下面这种嵌套 if 也属于不必要的阅读负担。外层只判断事件类型，内层只判断阶段，而且内层没有对应的 `else` 分支，读者需要多进一层才知道真正执行条件。
+
+```ts
+} else if (streamEvent.kind === "reasoningDelta") {
+  if (this.phase !== "message" && this.phase !== "toolCall") {
+    this.reasoningContent += streamEvent.delta;
+    this.phase = "reasoning";
+  }
+}
+```
+
+更合适的写法是把同一动作的前置条件合并到一个 `else if` 里，让分支入口就表达完整执行条件。
+
+```ts
+} else if (
+  streamEvent.kind === "reasoningDelta" &&
+  this.phase !== "message" &&
+  this.phase !== "toolCall"
+) {
+  this.reasoningContent += streamEvent.delta;
+  this.phase = "reasoning";
+}
+```
+
 ## 决策偏好
 
 拿不准时，优先少一层。
