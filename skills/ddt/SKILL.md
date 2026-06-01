@@ -1,13 +1,13 @@
 ---
 name: ddt
-description: 检查并纠正代码里的过度封装、过度抽象、薄 helper、薄类型拆分和编码规范问题；当用户要求内联小函数、合并薄类型、提升代码可读性或检查代码是否符合项目规范时使用。
+description: 检查并纠正代码里的过度封装、过度抽象、薄 helper、薄类型拆分、实例属性绕传参数和编码规范问题；当用户要求内联小函数、合并薄类型、提升代码可读性或检查代码是否符合项目规范时使用。
 ---
 
 # ddt
 
 DDT 表示 dont-do-that packaging。
 
-这个 skill 用来约束一种常见坏味道，就是明明代码很短、语义很直接、调用关系也很单一，却还要硬拆一层函数、硬拆一层类型，最后让人类阅读路径变长，理解成本变高。
+这个 skill 用来约束一种常见坏味道，就是明明代码很短、语义很直接、调用关系也很单一，却还要硬拆一层函数、硬拆一层类型，或者把 class 已经持有的实例状态沿着私有方法一层层传下去，最后让人类阅读路径变长，理解成本变高。
 
 ## 规范读取要求
 
@@ -25,6 +25,7 @@ DDT 表示 dont-do-that packaging。
 - 要求把 helper 内联回主流程
 - 要求把薄类型合并，减少阅读跳转
 - 要求代码更贴近人类阅读，而不是为了形式上的分层去拆分
+- 指出 class 内部明明可以直接用实例属性，却把同一个值当参数在私有方法之间传来传去
 
 ## 核心原则
 
@@ -35,6 +36,8 @@ DDT 表示 dont-do-that packaging。
 如果一个类型只是从另一个类型里薄薄切出一层，没有形成稳定复用，也没有显著降低理解成本，默认这是过度拆分，应该合并回更直接的类型定义。只有在某个子类型真的被多个地方独立使用，或者拆出来以后能明显降低主类型复杂度时，才保留拆分。
 
 代码优先服务人类阅读，不优先服务形式上的解耦。局部轻微耦合通常比多跳一层更好读。
+
+class 内部已经稳定存在的实例状态，不要再为了“显式传参”沿着私有方法链路传递。私有方法本来就是实例行为，直接读 `this.xxx` 往往比 `const xxx = this.xxx; this.a(xxx); this.b(xxx);` 更短，也更能表达这个值属于对象状态。只有参数来自当前调用现场、会随每次调用变化、方法需要脱离实例复用，或者显式传入能明显降低耦合时，才保留参数。
 
 兜底逻辑也要看真实收益。只有输入来自不稳定外部边界，或者缺少兜底会造成明确错误时，才保留防御分支。不要为了“更稳”给已经有确定生命周期、确定状态机、确定类型约束的流程再加一层兜底。
 
@@ -68,11 +71,25 @@ DDT 表示 dont-do-that packaging。
 
 子类型会被多个模块共享。某个嵌套结构本身就有稳定语义。主类型已经长到影响阅读，拆出来能明显提升可读性。或者这个子类型本身就是一个独立边界，比如 API 返回体、数据库行结构、消息体结构。
 
+## 实例属性和参数传递判断规则
+
+遇到 class 内部私有方法之间传参时，按这个顺序判断。
+
+先看这个参数是不是已经来自当前实例属性。如果调用方只是 `const value = this.value`，然后把 `value` 传给同类私有方法，默认这是不必要的参数绕行。
+
+再看这个参数是不是沿着多个私有方法继续下传。如果每一层都只是接收、再转交，且没有形成新的局部含义，优先改成目标方法直接读取实例属性。
+
+再看这个方法有没有脱离实例复用的真实需求。如果方法只服务当前 class，没有作为纯函数导出，也没有被多个对象上下文复用，就不要为了形式上的“依赖显式”牺牲阅读路径。
+
+只有下面这些情况才建议保留参数。
+
+参数来自当前调用现场而不是实例状态。参数每次调用会按分支变化。方法需要表达一个真正的输入边界。传参能让方法更容易测试且不会制造绕行。或者这个值虽然存在于实例上，但目标方法使用的是调用方处理后的临时结果。
+
 ## 执行动作
 
 当确认存在过度封装时，直接做这些事。
 
-把单一调用方的小函数内联回调用处。删掉无收益的 helper。把过薄的类型合并回主类型。删掉只是转手透传的中间层。删掉主流程已经保证不会触发的兜底分支。保留必要注释，但只解释关键意图，不重复代码表面行为。
+把单一调用方的小函数内联回调用处。删掉无收益的 helper。把过薄的类型合并回主类型。删掉只是转手透传的中间层。删掉主流程已经保证不会触发的兜底分支。把明明来自实例属性、却沿着私有方法绕传的参数收回到目标方法内部直接读取。保留必要注释，但只解释关键意图，不重复代码表面行为。
 
 如果用户是在 review 代码而不是要求直接修改，就明确指出哪些函数或类型属于过度封装，并给出一句话理由，重点讲清楚为什么这层拆分让阅读变差。
 
@@ -101,6 +118,8 @@ DDT 表示 dont-do-that packaging。
 没有复用价值，却只为了看起来工整而把嵌套对象强行拆出去。
 
 只服务一处简单查询或判断的业务数字，不要为了避开“魔法数字”机械新增枚举。比如逻辑删除字段 `doDelete = 0` 只在一个很短的查询里使用时，直接写在查询条件里更清楚；只有状态值会跨多个文件、多个分支、多个业务动作复用，或者数字本身难以从上下文理解时，才抽到 `enum/**`。
+
+class 已经持有的实例属性，不要先读出来再当参数传给同类私有方法，尤其不要一层层转交。比如 `const model = await this.flashModel; this.createGraph(model); this.createDefaultAgent(model);` 这种写法会让读者误以为 `model` 是调用现场的可变输入，而不是对象自己的固定状态。
 
 主流程已经通过事件顺序、状态变量或类型定义保证不会触发的防御分支，不要再作为“兜底”保留。比如 `textEnd` 已经负责关闭正文消息时，工具调用开始分支里就不应该再补一次正文关闭。
 
@@ -318,6 +337,46 @@ export class AgentQuery {
 ) {
   this.reasoningContent += streamEvent.delta;
   this.phase = "reasoning";
+}
+```
+
+例子七。
+
+下面这种写法也是典型的参数绕行。`flashModel` 已经是当前实例的属性，调用方只是取出来再传给同类私有方法，中间没有形成新的输入语义。
+
+```ts
+async streamEvents() {
+  const model = await this.flashModel;
+  const workflow = this.createGraph(model);
+  return await workflow.streamEvents();
+}
+
+private createGraph(model: ChatModel) {
+  const defaultAgent = this.createDefaultAgent(model);
+  return new StateGraph().addNode("default", defaultAgent.graph).compile();
+}
+
+private createDefaultAgent(model: ChatModel) {
+  return createAgent({ model });
+}
+```
+
+更合适的写法是让真正消费实例状态的方法直接读取 `this.flashModel`，调用链不再携带这个多余参数。
+
+```ts
+async streamEvents() {
+  const workflow = await this.createGraph();
+  return await workflow.streamEvents();
+}
+
+private async createGraph() {
+  const defaultAgent = await this.createDefaultAgent();
+  return new StateGraph().addNode("default", defaultAgent.graph).compile();
+}
+
+private async createDefaultAgent() {
+  const model = await this.flashModel;
+  return createAgent({ model });
 }
 ```
 
